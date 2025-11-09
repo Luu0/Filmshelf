@@ -25,7 +25,7 @@ namespace FilmShelf_App.Services
             _encoderService = encoderService;
             _mapper = mapper;
             _config = config;
-            _secret = _config.GetSection("Secrets:JWT")?.Value?.ToString() ?? string.Empty;
+            _secret = _config.GetSection("Secret:JWT")?.Value?.ToString() ?? string.Empty;
 
         }
 

@@ -52,7 +52,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 
 //JWT
-var secret = builder.Configuration.GetSection("Secrets:JWT")?.Value?.ToString() ?? string.Empty;
+var secret = builder.Configuration.GetSection("Secret:JWT")?.Value?.ToString() ?? string.Empty;
 var key = Encoding.UTF8.GetBytes(secret);
 
 builder.Services.AddAuthentication(opts =>
