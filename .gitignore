@@ -1,0 +1,16 @@
+# Carpetas de Visual Studio
+.vs/
+bin/
+obj/
+
+# Archivos temporales o de usuario
+*.user
+*.suo
+*.log
+
+# Archivos de base de datos local
+*.mdf
+*.ldf
+
+# Configuraciones personales
+appsettings.Development.json
