@@ -34,17 +34,26 @@ namespace FilmShelf_App.Services
             return await _userService.GetAll();
         }
 
-        async public Task<UserWithoutPasswordDTO> Register(RegisterDTO register) 
+        async public Task<UserWithoutPasswordDTO> Register(RegisterDTO register)
         {
             var user = await _userService.GetOneByEmailOrUsername(register.Email, register.UserName);
+
             if (user != null)
             {
-                throw new HttpResponseError(HttpStatusCode.BadRequest, "User already exists");
+                if (user.Email == register.Email)
+                    throw new HttpResponseError(HttpStatusCode.BadRequest, "Email already in use");
 
+                if (user.UserName == register.UserName)
+                    throw new HttpResponseError(HttpStatusCode.BadRequest, "Username already in use");
+
+                throw new HttpResponseError(HttpStatusCode.BadRequest, "User already exists");
             }
+
             var created = await _userService.CreateOne(register);
             return created;
         }
+
+
 
 
 
