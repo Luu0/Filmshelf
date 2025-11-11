@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
-@layer base {
-  body { @apply bg-gray-900 text-gray-100; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-image: linear-gradient(to left, #37312a, #191817, #191817);
+  color: #ffff;
+}
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px;
+}
+.film-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  object-fit: cover;
+}
+.film-card {
+  border-radius: 20px;
+  width: 240px;
+  box-shadow: 0 3px 10px rgba(229, 212, 212, 0.2);
+  overflow: hidden;
 }
