@@ -2,7 +2,9 @@ import { api } from "../utils/api.js";
 
 // LOGIN
 export const signIn = async (credentials) => {
-  const res = await api.post("/filmshelf/login", credentials);
+  const res = await api.post("/filmshelf/login", credentials, {
+    withCredentials: true,
+  });
   return res.data;
 };
 

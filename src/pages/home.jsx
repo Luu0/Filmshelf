@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useMovieStore } from "./store/useMovieStore";
-import Search from "./Components/search.jsx";
-import SideBar from "./Components/sideBar.jsx";
+import { useMovieStore } from "../store/useMovieStore.js";
+import Search from "../Components/search.jsx";
+import SideBar from "../Components/sideBar.jsx";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const LANG = import.meta.env.VITE_TMDB_LANG || "es-AR";
 const API_URL = "https://api.themoviedb.org/3";
