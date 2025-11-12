@@ -1,32 +1,66 @@
-import React from "react";
+import { Link, useRoute } from "wouter";
 
-export default function SideBar() {
+export default function SideBar({ isOpen = true }) {
+  
+  const [isHome] = useRoute("/");
+  const [isFavorites] = useRoute("/favorites");
+  const [isAdmin] = useRoute("/admin"); 
+  const [isSingin] = useRoute("/singIn"); 
+
   return (
     <>
-      <aside className="sidebar w-[200px] shrink-0 h-creen flex justify-between flex-col ">
-        <ul className="font-normal  flex flex-col place-items-start fixed  gap-15 p-4 ">
+      <aside
+        aria-hidden={!isOpen}
+        className={`sidebar ${isOpen ? 'w-56' : 'w-0'} shrink-0 h-screen fixed md:sticky top-0 left-0 flex justify-between flex-col transition-all duration-300 overflow-hidden z-40 bg-[#191817]`}
+      >
+        <ul className="font-normal flex flex-col place-items-start gap-y-4 p-4 overflow-y-auto h-full">
           <li>
-            <a href="#" className=" w-full flex items-center p-2 ">
+            <Link href="/" className=" w-full flex items-center p-2 ">
               <span className="ms-3 font-bold">FILMSHELF</span>
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#">
-              <i class="fa-solid fa-film"></i> Home
-            </a>
+            <Link 
+              href="/"
+              className={`flex items-center gap-2 p-1 ${isHome ? 'font-bold' : ''}`}
+            >
+              <i className="fa-solid fa-film"></i>
+              <span>Home</span>
+            </Link>
           </li>
           <li>
-            <a href="">
-              <i class="fa-regular fa-heart"> </i> Favourites
-            </a>
+            <Link 
+              href="/favorites"
+              className={`flex items-center gap-2 p-1 ${isFavorites ? 'font-bold' : ''}`}
+            >
+              <i className="fa-regular fa-heart"></i>
+              <span>Favoritos</span>
+            </Link>
           </li>
-          <li className="">
-            <a href="">
-              <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign Up
-            </a>
+          
+          <li>
+            <Link
+              href="/admin"
+              className={`flex items-center gap-2 p-1 ${isAdmin ? 'font-bold' : ''}`}
+            >
+              <i className="fa-solid fa-user-shield"></i>
+              <span>Admin</span>
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              href="/singin"
+              className={`flex items-center gap-2 p-1 ${isSingin ? 'font-bold' : ''}`}
+            >
+              <i className="fa-solid fa-arrow-right-to-bracket"></i>
+              <span>Sign Up</span>
+            </Link>
+
           </li>
         </ul>
       </aside>
     </>
   );
+
 }

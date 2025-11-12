@@ -1,18 +1,32 @@
-import { Route } from "wouter";
+import { Suspense } from "react";
+import { Route, Switch }from "wouter";
 import Welcome from "./pages/welcome";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Home from "./pages/home";
 
-function App() {
+
+
+// 1. Importa el PageLoader para el Suspense principal
+import PageLoader from "./Components/pageloader.jsx";
+
+// 2. Importa el componente que tiene el LAYOUT
+import AppRoutes from "./Components/appRoutesHome.jsx";
+
+
+export default function App() {
   return (
-    <>
-      <Route path="/" component={Welcome} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-      <Route path="/home" component={Home} />
-    </>
+
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/singIn" component={Welcome} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+
+        {/* --- RUTAS CON LAYOUT --- */}
+        <Route component={AppRoutes} />
+      </Switch>
+    </Suspense>
+
   );
 }
-
-export default App;
