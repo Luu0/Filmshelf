@@ -1,17 +1,16 @@
-import React from "react";
-import Home from "./home.jsx";
-import SideBar from "./Components/sideBar.jsx";
-import Search from "./Components/search.jsx";
+import { Route } from "wouter";
+import Welcome from "./pages/welcome";
+import Login from "./pages/login";
+import Register from "./pages/register";
 
-export default function App() {
+function App() {
   return (
     <>
-      <div className="flex min-h-screen  ">
-        <SideBar />
-        <div className=" flex flex-1">
-          <Home />
-        </div>
-      </div>
+      <Route path="/" component={Welcome} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
     </>
   );
 }
+
+export default App;
