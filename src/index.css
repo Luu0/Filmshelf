@@ -1,17 +1,16 @@
 @import "tailwindcss";
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
+
 html,
 #root,
 body {
-  height: 100%;
   min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .cards-container {
   display: flex;
   flex-wrap: wrap;
@@ -30,6 +29,7 @@ body {
   object-fit: cover;
 }
 .film-card {
+  position: relative;
   border-radius: 20px;
   width: 245px;
   box-shadow: 0 3px 10px rgba(229, 212, 212, 0.2);
@@ -38,6 +38,11 @@ body {
 
 .sidebar {
   box-shadow: 0px 0px 10px #6100c2;
+}
+
+/* Transición para la sidebar */
+.sidebar {
+  transition: all 0.25s ease;
 }
 
 .sidebar-link a :hover {
