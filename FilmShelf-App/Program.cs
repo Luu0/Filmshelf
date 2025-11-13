@@ -51,6 +51,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
       options.UseSqlServer(builder.Configuration.GetConnectionString("filmShelfConnection")));
 
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+
 //JWT
 var secret = builder.Configuration.GetSection("Secret:JWT")?.Value?.ToString() ?? string.Empty;
 var key = Encoding.UTF8.GetBytes(secret);
@@ -95,6 +107,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowFrontend");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

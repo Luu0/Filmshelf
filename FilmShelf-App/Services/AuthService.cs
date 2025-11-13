@@ -37,15 +37,44 @@ namespace FilmShelf_App.Services
         async public Task<UserWithoutPasswordDTO> Register(RegisterDTO register) 
         {
             var user = await _userService.GetOneByEmailOrUsername(register.Email, register.UserName);
+
             if (user != null)
             {
-                throw new HttpResponseError(HttpStatusCode.BadRequest, "User already exists");
+                if (user.Email == register.Email)
+                    throw new HttpResponseError(HttpStatusCode.BadRequest, "Email already in use");
 
+                if (user.UserName == register.UserName)
+                    throw new HttpResponseError(HttpStatusCode.BadRequest, "Username already in use");
+
+                throw new HttpResponseError(HttpStatusCode.BadRequest, "User already exists");
             }
+
             var created = await _userService.CreateOne(register);
             return created;
         }
+        // Metodo nuevo get user by id
+        async public Task<UserWithoutPasswordDTO> GetUserById(string id)
+        {
+            var user = await _userService.GetOneById(id);
+            if (user == null)
+            {
+                throw new HttpResponseError(HttpStatusCode.NotFound, "User not found");
+            }
+            return _mapper.Map<User, UserWithoutPasswordDTO>(user);
+        }
 
+        // ACTUALIZAR USUARIO 
+        async public Task<UserWithoutPasswordDTO> UpdateUser(string id, UpdateUserDTO dto)
+        {
+            var updatedUser = await _userService.UpdateUser(id, dto);
+            return _mapper.Map<User, UserWithoutPasswordDTO>(updatedUser);
+        }
+
+        // BORRAR USUARIO 
+        async public Task DeleteUser(string id)
+        {
+            await _userService.DeleteOneById(id);
+        }
 
 
         async public Task<LoginResponseDTO> Login(LoginDTO login, HttpContext context)
@@ -140,9 +169,6 @@ namespace FilmShelf_App.Services
                         IsPersistent = true,
                         ExpiresUtc = DateTime.UtcNow.AddDays(1)
                     }
-
-
-
                 );
         }
     }

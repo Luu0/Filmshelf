@@ -17,17 +17,28 @@ namespace FilmShelf_App.Repositories
             _contextDB = contextDB;
 
         }
-
-
-        new async public Task<User> GetOneAsync(Expression<Func<User, bool>>? filter = null)
+        public override async Task<User> GetOneAsync(Expression<Func<User, bool>>? filter = null)
         {
             IQueryable<User> query = dbSet;
             if (filter != null)
             {
+                // Ahora sí se cargan los roles
                 query = query.Where(filter).Include(x => x.Roles);
             }
             return await query.FirstOrDefaultAsync();
+        }
 
+        // Esto es para que la tabla del admin panel también muestre los roles
+        public override async Task<IEnumerable<User>> GetAllAsync(Expression<Func<User, bool>>? filter = null)
+        {
+            IQueryable<User> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            // Le decimos que incluya los roles al traer TODOS los usuarios
+            return await query.Include(x => x.Roles).ToListAsync();
         }
     }
 }

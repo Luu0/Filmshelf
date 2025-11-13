@@ -1,11 +1,12 @@
-﻿using FilmShelf_App.Models.User.DTO;
+﻿using FilmShelf_App.Enums;
 using FilmShelf_App.Models.User;
+using FilmShelf_App.Models.User.DTO;
 using FilmShelf_App.Services;
 using FilmShelf_App.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using FilmShelf_App.Enums;
+using System.Security.Claims;
 
 namespace FilmShelf_App.Controllers
 {
@@ -85,9 +86,96 @@ namespace FilmShelf_App.Controllers
 
             }
 
+            [HttpGet("me")]
+            [Authorize] 
+            [ProducesResponseType(typeof(UserWithoutPasswordDTO), StatusCodes.Status200OK)]
+            [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
+            [ProducesResponseType(typeof(HttpMessage), StatusCodes.Status500InternalServerError)]
+            async public Task<ActionResult<UserWithoutPasswordDTO>> GetSelf()
+            {
+                try
+                {
+                    var userId = User.FindFirstValue("id");
+                    if (userId == null)
+                    {
+                        return Unauthorized();
+                    }
+
+                    var user = await _authService.GetUserById(userId);
+                    if (user == null)
+                    {
+                        return Unauthorized();
+                    }
+
+                    return Ok(user);
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode
+                    (
+                        (int)HttpStatusCode.InternalServerError,
+                        new HttpMessage(ex.Message)
+                    );
+                }
+            }
+
+        // MÉTODO NUEVO: ACTUALIZAR USUARIO
+        [HttpPut("users/{id}")]
+        [Authorize(Roles = ROLE.ADMIN)] // Solo el Admin puede editar
+        [ProducesResponseType(typeof(UserWithoutPasswordDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(HttpMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(HttpMessage), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(HttpMessage), StatusCodes.Status404NotFound)]
+        async public Task<ActionResult<UserWithoutPasswordDTO>> UpdateUser(string id, [FromBody] UpdateUserDTO dto)
+        {
+            try
+            {
+                var updatedUser = await _authService.UpdateUser(id, dto);
+                return Ok(updatedUser);
+            }
+            catch (HttpResponseError ex)
+            {
+                return StatusCode((int)ex.StatusCode, new HttpMessage(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new HttpMessage(ex.Message));
+            }
+        }
+
+        //BORRAR USUARIO 
+        [HttpDelete("users/{id}")]
+        [Authorize(Roles = ROLE.ADMIN)] // Solo el Admin puede borrar
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(HttpMessage), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(HttpMessage), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(HttpMessage), StatusCodes.Status404NotFound)]
+        async public Task<ActionResult> DeleteUser(string id)
+        {
+            try
+            {
+                // No podemos permitir que un admin se borre a sí mismo
+                var selfId = User.FindFirstValue("id");
+                if (selfId == id)
+                {
+                    throw new HttpResponseError(HttpStatusCode.BadRequest, "No puedes eliminar tu propia cuenta de administrador.");
+                }
+
+                await _authService.DeleteUser(id);
+                return NoContent(); 
+            }
+            catch (HttpResponseError ex)
+            {
+                return StatusCode((int)ex.StatusCode, new HttpMessage(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new HttpMessage(ex.Message));
+            }
+        }
 
 
-            [HttpPost("logout")]
+        [HttpPost("logout")]
             [ProducesResponseType(typeof(void), StatusCodes.Status200OK)]
             [ProducesResponseType(typeof(void), StatusCodes.Status401Unauthorized)]
             [ProducesResponseType(typeof(HttpMessage), StatusCodes.Status500InternalServerError)]
@@ -120,6 +208,8 @@ namespace FilmShelf_App.Controllers
             }
 
 
+
+            
             [HttpGet("users")]
             [Authorize(Roles = $"{ROLE.MOD}, {ROLE.ADMIN}")]
             async public Task<ActionResult<List<UserWithoutPasswordDTO>>> GetUsers()

@@ -39,7 +39,7 @@ namespace FilmShelf_App.Repositories
             await SaveAsync();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null)
+        public async virtual Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null)
         {
             IQueryable<T> query = dbSet;
             if (filter != null)
@@ -49,7 +49,7 @@ namespace FilmShelf_App.Repositories
             return await query.ToListAsync();
         }
 
-        async public Task<T> GetOneAsync(Expression<Func<T, bool>>? filter = null)
+        async public virtual Task<T> GetOneAsync(Expression<Func<T, bool>>? filter = null)
         {
             IQueryable<T> query = dbSet;
             if (filter != null)
