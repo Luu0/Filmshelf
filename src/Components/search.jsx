@@ -1,6 +1,8 @@
+import { useLocation } from "wouter";
 import { useMovieStore } from "../store/useMovieStore.js";
 
 export default function Search() {
+  const [, setLocation] = useLocation();
   const { query, setQuery, searchMovies, loading, err } = useMovieStore();
 
   return (
@@ -11,19 +13,20 @@ export default function Search() {
           <li>
             <ul className="flex items-center justify-center gap-4 md:gap-8"> 
               <li>
-                <p className="text-white font-medium hover:text-violet-400 transition-colors cursor-pointer text-lg">
+                <button 
+                  onClick={() => setLocation("/movies")}
+                  className="text-white font-medium hover:text-violet-400 transition-colors cursor-pointer text-lg"
+                >
                   Movies
-                </p>
+                </button>
               </li>
               <li>
-                <p className="text-white font-medium hover:text-violet-400 transition-colors cursor-pointer text-lg">
+                <button 
+                  onClick={() => setLocation("/series")}
+                  className="text-white font-medium hover:text-violet-400 transition-colors cursor-pointer text-lg"
+                >
                   Series
-                </p>
-              </li>
-              <li>
-                <p className="text-white font-medium hover:text-violet-400 transition-colors cursor-pointer text-lg">
-                  Documentaries
-                </p>
+                </button>
               </li>
             </ul>
           </li>

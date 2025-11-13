@@ -6,7 +6,10 @@ import PageLoader from './pageloader.jsx';
 
 import Home from '../pages/home.jsx';
 import Favorites from '../pages/Favorites.jsx';
+import Movies from '../pages/movies.jsx';
+import Series from '../pages/series.jsx';
 const MovieView = lazy(() => import('../pages/movie-view.jsx'));
+const SeriesView = lazy(() => import('../pages/series-view.jsx'));
 
 const AdminPanel = lazy(() => import('../pages/adminPanel.jsx'));
 
@@ -17,7 +20,10 @@ export default function AppRoutes() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/favorites" component={Favorites} />
+          <Route path="/movies" component={Movies} />
+          <Route path="/series" component={Series} />
           <Route path="/movie/:id" component={MovieView} />
+          <Route path="/tv/:id" component={SeriesView} />
           <Route path="/admin" component={AdminPanel} />
           
           <Route>

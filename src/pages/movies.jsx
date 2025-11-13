@@ -1,28 +1,26 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMovieStore } from "../store/useMovieStore";
-import Search from "../Components/search.jsx";
 import Carousel from "../Components/Carousel.jsx";
 
-export default function Home() {
+export default function Movies() {
   const [, setLocation] = useLocation();
   const {
-    movies,
-    background,
-    titleMovie,
-    bannerMovieId, 
-    toggleFavorite, 
-    fetchTrending,
     actionMovies,
     comedyMovies,
     horrorMovies,
-    tvSeries,
-    documentaries,
+    popularMovies,
+    adventureMovies,
+    background,
+    titleMovie,
+    bannerMovieId,
+    toggleFavorite,
     fetchActionMovies,
     fetchComedyMovies,
     fetchHorrorMovies,
-    fetchTvSeries,
-    fetchDocumentaries,
+    fetchPopularMovies,
+    fetchAdventureMovies,
+    fetchTrending,
   } = useMovieStore();
 
   useEffect(() => {
@@ -30,20 +28,19 @@ export default function Home() {
     fetchActionMovies();
     fetchComedyMovies();
     fetchHorrorMovies();
-    fetchTvSeries();
-    fetchDocumentaries();
+    fetchPopularMovies();
+    fetchAdventureMovies();
   }, [
     fetchTrending,
     fetchActionMovies,
     fetchComedyMovies,
     fetchHorrorMovies,
-    fetchTvSeries,
-    fetchDocumentaries,
+    fetchPopularMovies,
+    fetchAdventureMovies,
   ]);
 
-  const displayTitle = titleMovie || "Título de Película";
+  const displayTitle = titleMovie || "Popular Movies";
 
-  // CREA EL MANEJADOR PARA EL CLIC
   const handleFavoriteClick = () => {
     if (bannerMovieId) {
       toggleFavorite(bannerMovieId);
@@ -59,8 +56,6 @@ export default function Home() {
   return (
     <main className="grow flex flex-col overflow-y-auto overflow-x-hidden">
       <div className="relative w-full h-[250px] md:h-[350px] overflow-hidden rounded-lg shadow-xl mb-4 mx-4 mt-20 md:mx-6 md:mt-6">
-        <Search />
-
         {background && (
           <img
             src={background}
@@ -72,7 +67,6 @@ export default function Home() {
 
         <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent"></div>
 
-        {/* Contenido del Banner (Título y Botones) */}
         <div className="absolute bottom-4 left-4 md:bottom-10 md:left-10 text-white max-w-2xl">
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-2 leading-tight">
             {displayTitle}
@@ -89,16 +83,22 @@ export default function Home() {
             </button>
           </div>
         </div>
+
+        <button 
+          onClick={() => setLocation("/")}
+          className="absolute top-4 left-4 flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors"
+        >
+          <i className="fa-solid fa-arrow-left"></i>
+          Back
+        </button>
       </div>
 
-      {/* Carruseles de categorias */}
       <section className="flex-1 py-6 px-0 md:px-6">
-        <Carousel title="Recommended" items={movies} />
+        <Carousel title="Popular Movies" items={popularMovies} />
         <Carousel title="Action movies" items={actionMovies} />
         <Carousel title="Comedy movies" items={comedyMovies} />
         <Carousel title="Horror movies" items={horrorMovies} />
-        <Carousel title="TV Series" items={tvSeries} />
-        <Carousel title="Documentaries" items={documentaries} />
+        <Carousel title="Adventure movies" items={adventureMovies} />
       </section>
     </main>
   );

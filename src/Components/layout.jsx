@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import SideBar from './sideBar.jsx';
+import Footer from './footer.jsx';
 
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [location] = useLocation();
-  const showSidebar = location === "/" || location === "/favorites" || location === "/admin";
+  const showSidebar = location === "/" || location === "/favorites" || location === "/admin" || location === "/movies" || location === "/series";
 
   return (
     <div className="flex min-h-screen">
       {showSidebar && <SideBar isOpen={sidebarOpen} />}
 
-      <div className="flex flex-1 min-w-0">
-        
+      <div className="flex flex-1 min-w-0 flex-col">
         {showSidebar && (
           <button
             aria-label={sidebarOpen ? 'Cerrar' : 'Abrir'}
@@ -26,7 +26,12 @@ export default function Layout({ children }) {
             <i className={`fa-solid ${sidebarOpen ? 'fa-chevron-left' : 'fa-bars'}`}></i>
           </button>
         )}
-        {children}
+
+        <div className="flex-1 min-h-0">
+          {children}
+        </div>
+
+        <Footer />
       </div>
     </div>
   );

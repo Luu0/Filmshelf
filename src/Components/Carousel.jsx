@@ -58,9 +58,11 @@ export default function Carousel({ title, items = [] }) {
               const isLiked = favorites.some((f) => f.id === item.id);
               const poster = item.poster_path || item.still_path;
               const title = item.title || item.name;
+              const isTV = !!item.name && !item.title;
+              const href = isTV ? `/tv/${item.id}` : `/movie/${item.id}`;
 
               return (
-                <Link key={item.id} href={`/movie/${item.id}`}>
+                <Link key={item.id} href={href}>
                   <div
                     className="shrink-0 w-44 h-64 bg-gray-800 rounded-lg overflow-hidden group/card relative cursor-pointer"
                   >

@@ -1,5 +1,7 @@
 import axios from "axios";
 import { create } from "zustand";
+// 1. IMPORTA TUS FUNCIONES DE AUTENTICACIÓN
+import { signIn, signOut, getSelf } from "../services/auth";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const LANG = import.meta.env.VITE_TMDB_LANG || "es-AR";
@@ -7,31 +9,72 @@ const API_URL = "https://api.themoviedb.org/3";
 const IMG_BASE_URL = "https://image.tmdb.org/t/p/";
 
 export const useMovieStore = create((set, get) => ({
-  // ESTADOS
+  // --- ESTADOS DE PELÍCULAS ---
   movies: [],
   query: "",
-  loading: false,
+  loading: false, // Loading general para auth y fetches
   err: "",
   background: null,
   titleMovie: null,
-
-  // Listas por categoría
+  bannerMovieId: null, // ID de la peli en el banner
   favorites: [],
   actionMovies: [],
   comedyMovies: [],
   horrorMovies: [],
+  popularMovies: [],
+  adventureMovies: [],
   tvSeries: [],
+  actionSeries: [],
+  comedySeries: [],
+  horrorSeries: [],
   documentaries: [],
-
-  // Estado para la vista de detalles
   selectedMovie: null,
 
-  // ACCIONES
+  // --- ESTADOS DE AUTENTICACIÓN ---
+  isAuthenticated: false,
+  isAuthLoading: true, // Para saber si la app está verificando el auth inicial
+  user: null, // Para guardar los datos del usuario logueado
 
-  // Setter para query (usado por search.jsx)
+  // --- ACCIONES DE AUTENTICACIÓN ---
+  checkLoginStatus: async () => {
+    set({ isAuthLoading: true });
+    try {
+      const user = await getSelf(); // Llama a tu API (/me)
+      // Si tiene éxito, guarda al usuario y marca como autenticado
+      set({ isAuthenticated: true, user: user, isAuthLoading: false });
+    } catch (e) {
+      // Si falla (error 401), no está logueado
+      set({ isAuthenticated: false, user: null, isAuthLoading: false });
+    }
+  },
+
+  login: async (credentials) => {
+    set({ loading: true, err: "" });
+    try {
+      const res = await signIn(credentials); // Llama a /login
+      // Guardamos el usuario que devuelve el login
+      set({ isAuthenticated: true, user: res.user, loading: false });
+      return res; // Devuelve la respuesta
+    } catch (error) {
+      set({ loading: false, err: "Invalid email or password", user: null });
+      throw error; // Lanza el error para que el componente Login lo atrape
+    }
+  },
+
+  logout: async () => {
+    try {
+      await signOut(); // Llama a /logout
+      // Limpiamos el usuario al salir
+      set({ isAuthenticated: false, user: null, favorites: [] });
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  },
+
+  // --- ACCIONES DE PELÍCULAS ---
+
   setQuery: (query) => set({ query }),
 
-  // FETCH PARA VISTA DE DETALLES
   fetchMovieById: async (movieId) => {
     set({ loading: true, err: "" });
     try {
@@ -49,7 +92,6 @@ export const useMovieStore = create((set, get) => ({
 
   clearSelectedMovie: () => set({ selectedMovie: null }),
 
-  // FETCH PARA HOME
   fetchTrending: async () => {
     set({ loading: true, err: "" });
     try {
@@ -63,16 +105,13 @@ export const useMovieStore = create((set, get) => ({
       let finalBackgroundUrl = null;
 
       if (moviesWithBackdrop.length > 0) {
-        // 1. Preferimos una película con backdrop al azar
         movieToDisplay =
           moviesWithBackdrop[
             Math.floor(Math.random() * moviesWithBackdrop.length)
           ];
       } else if (movies.length > 0) {
-        // 2. Si no hay, usamos la primera que tenga poster
         movieToDisplay = movies.find((m) => m.poster_path);
       }
-      // 3. Si no hay ninguna con poster, movieToDisplay queda null
 
       if (movieToDisplay) {
         if (movieToDisplay.backdrop_path) {
@@ -88,10 +127,10 @@ export const useMovieStore = create((set, get) => ({
             movieToDisplay.title ||
             movieToDisplay.name ||
             "Película sin título",
+          bannerMovieId: movieToDisplay.id,
         });
       } else {
-        // No hay películas en el resultado
-        set({ movies, background: null, titleMovie: null });
+        set({ movies, background: null, titleMovie: null, bannerMovieId: null });
       }
     } catch (error) {
       console.error("Error fetching trending movies:", error);
@@ -102,7 +141,7 @@ export const useMovieStore = create((set, get) => ({
   },
 
   searchMovies: async (query) => {
-    if (!query.trim()) return get().fetchTrending(); // Vuelve a trending si la búsqueda está vacía
+    if (!query.trim()) return get().fetchTrending();
     set({ loading: true, err: "" });
     try {
       const res = await axios.get(
@@ -111,7 +150,7 @@ export const useMovieStore = create((set, get) => ({
         )}&language=${LANG}&include_adult=false&api_key=${API_KEY}`
       );
       const movies = res.data.results || [];
-      set({ movies }); // Actualiza la lista principal con los resultados
+      set({ movies });
     } catch (error) {
       console.error("Error searching movies:", error);
       set({ err: error.message });
@@ -120,7 +159,18 @@ export const useMovieStore = create((set, get) => ({
     }
   },
 
-  toggleFavorite: (movieOrId) =>
+  // --- FUNCIÓN toggleFavorite (CON EL ALERT) ---
+  toggleFavorite: (movieOrId) => {
+    const isAuthenticated = get().isAuthenticated;
+
+    if (!isAuthenticated) {
+      // --- ¡AQUÍ ESTÁ TU CAMBIO! ---
+      alert("Debes estar logueado para añadir películas a favoritos.");
+      return;
+      // --- FIN DEL CAMBIO ---
+    }
+
+    // El resto de tu lógica (solo se ejecuta si está logueado)
     set((state) => {
       const id = typeof movieOrId === "object" ? movieOrId.id : movieOrId;
       const exists = state.favorites.some((f) => f.id === id);
@@ -145,9 +195,10 @@ export const useMovieStore = create((set, get) => ({
         }
         return { favorites: [...state.favorites, movieObj] };
       }
-    }),
+    });
+  },
 
-  // FETCHS POR GÉNERO
+  // --- FETCHS POR GÉNERO ---
   fetchActionMovies: async () => {
     set({ loading: true, err: "" });
     try {
@@ -193,6 +244,36 @@ export const useMovieStore = create((set, get) => ({
     }
   },
 
+  fetchPopularMovies: async () => {
+    set({ loading: true, err: "" });
+    try {
+      const res = await axios.get(
+        `${API_URL}/movie/popular?language=${LANG}&api_key=${API_KEY}`
+      );
+      set({ popularMovies: res.data.results || [] });
+    } catch (error) {
+      console.error("Error fetching popular movies:", error);
+      set({ err: error.message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchAdventureMovies: async () => {
+    set({ loading: true, err: "" });
+    try {
+      const res = await axios.get(
+        `${API_URL}/discover/movie?with_genres=12&language=${LANG}&api_key=${API_KEY}`
+      );
+      set({ adventureMovies: res.data.results || [] });
+    } catch (error) {
+      console.error("Error fetching adventure movies:", error);
+      set({ err: error.message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
   fetchTvSeries: async () => {
     set({ loading: true, err: "" });
     try {
@@ -202,6 +283,51 @@ export const useMovieStore = create((set, get) => ({
       set({ tvSeries: res.data.results || [] });
     } catch (error) {
       console.error("Error fetching TV series:", error);
+      set({ err: error.message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchActionSeries: async () => {
+    set({ loading: true, err: "" });
+    try {
+      const res = await axios.get(
+        `${API_URL}/discover/tv?with_genres=10759&language=${LANG}&api_key=${API_KEY}`
+      );
+      set({ actionSeries: res.data.results || [] });
+    } catch (error) {
+      console.error("Error fetching action series:", error);
+      set({ err: error.message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchComedySeries: async () => {
+    set({ loading: true, err: "" });
+    try {
+      const res = await axios.get(
+        `${API_URL}/discover/tv?with_genres=35&language=${LANG}&api_key=${API_KEY}`
+      );
+      set({ comedySeries: res.data.results || [] });
+    } catch (error) {
+      console.error("Error fetching comedy series:", error);
+      set({ err: error.message });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchHorrorSeries: async () => {
+    set({ loading: true, err: "" });
+    try {
+      const res = await axios.get(
+        `${API_URL}/discover/tv?with_genres=80&language=${LANG}&api_key=${API_KEY}`
+      );
+      set({ horrorSeries: res.data.results || [] });
+    } catch (error) {
+      console.error("Error fetching horror series:", error);
       set({ err: error.message });
     } finally {
       set({ loading: false });

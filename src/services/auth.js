@@ -17,7 +17,7 @@ export const signOut = async () => {
   await api.post("/filmshelf/logout");
 };
 
-// CHECK AUTH
+// CHECK AUTH (Este lo reemplazamos por getSelf)
 export const checkAuth = async () => {
   try {
     const res = await api.get("/filmshelf/health");
@@ -25,4 +25,10 @@ export const checkAuth = async () => {
   } catch {
     return false;
   }
+};
+
+
+export const getSelf = async () => {
+  const res = await api.get("/filmshelf/me");
+  return res.data; 
 };

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "wouter";
 import { useMovieStore } from "./store/useMovieStore";
 import Search from "./Components/search.jsx";
 import SideBar from "./Components/sideBar.jsx";
@@ -8,10 +9,17 @@ const API_URL = "https://api.themoviedb.org/3";
 const IMG_URL = "https://image.tmdb.org/t/p/original";
 
 export default function Home() {
-  const { movies, background, titleMovie, fetchTrending } = useMovieStore();
+  const [, setLocation] = useLocation();
+  const { movies, background, titleMovie, fetchTrending, bannerMovieId } = useMovieStore();
   useEffect(() => {
     fetchTrending();
   }, [fetchTrending]);
+
+  const handleJoinCritics = () => {
+    if (bannerMovieId) {
+      setLocation(`/movie/${bannerMovieId}`);
+    }
+  };
   return (
     <>
       <main className="grow">
@@ -25,7 +33,9 @@ export default function Home() {
           <div className="text-center absolute bottom-20 left-10 flex flex-col  justify-center ">
             <h2 className="font-bold text-[36px]">{titleMovie} </h2>
             <div className="flex flex-row items-center justify-center gap-4 absolute top-15 left-3">
-              <button className="critics-btn">Join the Critics</button>
+              <button className="critics-btn" onClick={handleJoinCritics}>
+                Join the Critics
+              </button>
               <button className="like-btn">
                 <i class="fa-solid fa-heart text-purple-900"></i>
               </button>
